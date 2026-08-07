@@ -119,9 +119,10 @@ export default function SubmitClaimPage() {
       const claimData: ClaimResult = await response.json();
       setResult(claimData);
       setSubmitStatus("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err.message || "An unexpected network error occurred.");
+      const errorMessage = err instanceof Error ? err.message : "An unexpected network error occurred.";
+      setErrorMsg(errorMessage);
       setSubmitStatus("error");
     }
   };

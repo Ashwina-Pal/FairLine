@@ -1,16 +1,72 @@
-name: CI
+name: Fairline CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main, master ]
 
 jobs:
-  placeholder:
+  backend-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Confirm pipeline is alive
-        run: echo "CI green"
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest python-multipart
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      - name: Run Ruff Lint Check
+        run: ruff check backend/
+
+      - name: Run Pytest Suite
+        run: |
+          export PYTHONPATH="."
+          pytest backend/tests/ -v
+
+  frontend-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm --prefix frontend ci
+
+      - name: Run ESLint Check
+        run: npm --prefix frontend run lint
+
+      - name: Build Next.js App
+        run: npm --prefix frontend run build
+
+      - name: Install Playwright Browsers
+        run: npx --prefix frontend playwright install --with-deps chromium
+
+      - name: Run Playwright e2e Tests
+        run: npx --prefix frontend playwright test
+        env:
+          CI: true
+
+      - name: Upload Playwright Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

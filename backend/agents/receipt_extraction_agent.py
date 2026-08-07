@@ -6,17 +6,19 @@
 # total_amount, date, confidence_score) from unstructured receipt images.
 # ==========================================
 
-import os
 import json
+import os
+
+from backend.models import ExtractedData
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from backend.models import ExtractedData
 
 # Load environment variables (searches parent directories for .env)
 load_dotenv()
 
 _client = None
+
 
 def get_gemini_client() -> genai.Client:
     global _client
@@ -26,6 +28,7 @@ def get_gemini_client() -> genai.Client:
             raise ValueError("GEMINI_API_KEY is not set in environment variables.")
         _client = genai.Client(api_key=api_key)
     return _client
+
 
 def extract_receipt_data(image_bytes: bytes, mime_type: str = "image/jpeg") -> ExtractedData:
     """
@@ -44,18 +47,11 @@ def extract_receipt_data(image_bytes: bytes, mime_type: str = "image/jpeg") -> E
         "Return the output strictly adhering to the schema."
     )
 
-
     try:
         # Generate content using Gemini 1.5 Flash with structured schema configuration
         response = client.models.generate_content(
             model="gemini-1.5-flash",
-            contents=[
-                types.Part.from_bytes(
-                    data=image_bytes,
-                    mime_type=mime_type
-                ),
-                prompt
-            ],
+            contents=[types.Part.from_bytes(data=image_bytes, mime_type=mime_type), prompt],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=ExtractedData,

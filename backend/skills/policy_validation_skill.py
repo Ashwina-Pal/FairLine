@@ -8,13 +8,12 @@
 # explanation packet for human approvers.
 # ==========================================
 
-from typing import Optional
-from backend.models import ManualInput, ExtractedData, EvidencePacket
+
+from backend.models import EvidencePacket, ExtractedData, ManualInput
+
 
 def evaluate_policy(
-    manual_input: ManualInput,
-    extracted_data: ExtractedData,
-    receipt_image_url: Optional[str] = None
+    manual_input: ManualInput, extracted_data: ExtractedData, receipt_image_url: str | None = None
 ) -> EvidencePacket:
     """
     Evaluates manual inputs and extracted receipt data against policy rules.
@@ -49,14 +48,6 @@ def evaluate_policy(
         )
 
     if not is_escalated:
-        return EvidencePacket(
-            is_escalated=False,
-            flagged_rule_ids=[],
-            explanation="Claim cleared policy checks."
-        )
+        return EvidencePacket(is_escalated=False, flagged_rule_ids=[], explanation="Claim cleared policy checks.")
 
-    return EvidencePacket(
-        is_escalated=True,
-        flagged_rule_ids=flagged_rule_ids,
-        explanation="; ".join(explanations)
-    )
+    return EvidencePacket(is_escalated=True, flagged_rule_ids=flagged_rule_ids, explanation="; ".join(explanations))

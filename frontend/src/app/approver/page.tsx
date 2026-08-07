@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface AuditLog {
   log_id: string;
@@ -48,7 +48,23 @@ export default function ApproverQueuePage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
-  const fetchQueue = async (autoSelectFirst = false) => {
+  const fetchClaimDetails = useCallback(async (claimId: string) => {
+    setLoadingDetail(true);
+    setSuccessMsg("");
+    try {
+      const res = await fetch(`${API_BASE_URL}/claims/${claimId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedClaim(data);
+      }
+    } catch (err) {
+      console.error("Failed to load claim details:", err);
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, []);
+
+  const fetchQueue = useCallback(async (autoSelectFirst = false) => {
     setLoadingQueue(true);
     try {
       const res = await fetch(`${API_BASE_URL}/claims/escalated`);
@@ -66,23 +82,7 @@ export default function ApproverQueuePage() {
     } finally {
       setLoadingQueue(false);
     }
-  };
-
-  const fetchClaimDetails = async (claimId: string) => {
-    setLoadingDetail(true);
-    setSuccessMsg("");
-    try {
-      const res = await fetch(`${API_BASE_URL}/claims/${claimId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSelectedClaim(data);
-      }
-    } catch (err) {
-      console.error("Failed to load claim details:", err);
-    } finally {
-      setLoadingDetail(false);
-    }
-  };
+  }, [fetchClaimDetails]);
 
   const handleDecision = async (claimId: string, decision: "APPROVE" | "REJECT") => {
     setActionLoading(true);
@@ -108,8 +108,9 @@ export default function ApproverQueuePage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchQueue(true);
-  }, []);
+  }, [fetchQueue]);
 
   const getActorLabel = (actor: string) => {
     switch (actor) {

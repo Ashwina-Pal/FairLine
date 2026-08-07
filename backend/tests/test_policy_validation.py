@@ -1,28 +1,30 @@
-import pytest
-from backend.models import ManualInput, ExtractedData
+from backend.models import ExtractedData, ManualInput
 from backend.skills.policy_validation_skill import evaluate_policy
+
 
 def test_clean_claim():
     """A claim that meets all policy rules should not be escalated."""
     manual = ManualInput(amount=15.00, category="Meals", date="2026-08-07", cost_center="ENG")
     extracted = ExtractedData(merchant="Local Deli", total_amount=15.00, date="2026-08-07", confidence_score=0.95)
-    
+
     result = evaluate_policy(manual, extracted, receipt_image_url="http://storage.example.com/receipt.jpg")
-    
+
     assert result.is_escalated is False
     assert len(result.flagged_rule_ids) == 0
     assert "cleared policy checks" in result.explanation
+
 
 def test_amount_mismatch():
     """A claim with different manual and extracted amounts should trigger AMOUNT_MISMATCH."""
     manual = ManualInput(amount=45.00, category="Supplies", date="2026-08-07", cost_center="ENG")
     extracted = ExtractedData(merchant="OfficeMax", total_amount=40.00, date="2026-08-07", confidence_score=0.90)
-    
+
     result = evaluate_policy(manual, extracted, receipt_image_url="http://storage.example.com/receipt.jpg")
-    
+
     assert result.is_escalated is True
     assert "AMOUNT_MISMATCH" in result.flagged_rule_ids
     assert "Amount claimed is $45.00 but receipt total is $40.00" in result.explanation
+
 
 def test_amount_mismatch_precision_rounding():
     """Amounts differing by minor fractions should be rounded to 2 decimals before comparison."""
@@ -37,6 +39,7 @@ def test_amount_mismatch_precision_rounding():
     result_fail = evaluate_policy(manual_fail, extracted, receipt_image_url="http://storage.example.com/receipt.jpg")
     assert result_fail.is_escalated is True
     assert "AMOUNT_MISMATCH" in result_fail.flagged_rule_ids
+
 
 def test_missing_documentation_boundary_checks():
     """Verifies rule boundaries for Category: Meals and Amount > $50."""
@@ -56,11 +59,13 @@ def test_missing_documentation_boundary_checks():
     assert "MISSING_DOCUMENTATION" in result_just_above_50.flagged_rule_ids
     assert result_just_above_50.is_escalated is True
 
-    # 3. Non-Meals category (e.g. Travel) at $100.00 with no image -> should PASS (documentation only enforced for Meals)
+    # 3. Non-Meals category (e.g. Travel) at $100.00 with no image
+    # -> should PASS (documentation only enforced for Meals)
     manual_travel = ManualInput(amount=100.00, category="Travel", date="2026-08-07", cost_center="OPS")
     extracted_travel = ExtractedData(merchant="Flight", total_amount=100.00, date="2026-08-07", confidence_score=0.90)
     result_travel = evaluate_policy(manual_travel, extracted_travel, receipt_image_url=None)
     assert "MISSING_DOCUMENTATION" not in result_travel.flagged_rule_ids
+
 
 def test_low_confidence_boundary_checks():
     """Verifies confidence score boundaries at the 0.85 threshold."""
@@ -78,17 +83,18 @@ def test_low_confidence_boundary_checks():
     assert "LOW_CONFIDENCE_EXTRACTION" in result_below.flagged_rule_ids
     assert result_below.is_escalated is True
 
+
 def test_multiple_rule_violations():
     """Multiple policy violations should all be returned together, without short-circuiting."""
     manual = ManualInput(amount=120.00, category="Meals", date="2026-08-07", cost_center="ENG")
     extracted = ExtractedData(merchant="Steakhouse", total_amount=100.00, date="2026-08-07", confidence_score=0.70)
-    
+
     # Triggers:
     # 1. Amount mismatch (120 vs 100)
     # 2. Missing documentation (Meals > 50, receipt_image_url is None)
     # 3. Low confidence (0.70 < 0.85)
     result = evaluate_policy(manual, extracted, receipt_image_url=None)
-    
+
     assert result.is_escalated is True
     assert "AMOUNT_MISMATCH" in result.flagged_rule_ids
     assert "MISSING_DOCUMENTATION" in result.flagged_rule_ids
@@ -97,4 +103,3 @@ def test_multiple_rule_violations():
     assert "Amount claimed is $120.00" in result.explanation
     assert "Missing receipt" in result.explanation
     assert "extraction confidence score (0.70)" in result.explanation
-

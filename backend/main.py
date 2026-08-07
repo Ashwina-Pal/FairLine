@@ -1,7 +1,13 @@
+import os
 from contextlib import asynccontextmanager
+
+from backend.firebase import get_firestore_client, init_firebase
+from backend.routes.claims import router as claims_router
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from firebase_admin import firestore
-from backend.firebase import init_firebase, get_firestore_client
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -12,10 +18,10 @@ async def lifespan(app: FastAPI):
         print(f"Firebase Admin SDK initialization failed on startup: {e}")
     yield
 
+
 app = FastAPI(lifespan=lifespan)
 
 # Configure CORS to allow local Next.js client access
-from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Permits all local web development ports
@@ -25,14 +31,12 @@ app.add_middleware(
 )
 
 # Mount local uploads directory for static receipt image serving fallback
-import os
-from fastapi.staticfiles import StaticFiles
 os.makedirs("backend/static/uploads", exist_ok=True)
 app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
 # Register Claims endpoints
-from backend.routes.claims import router as claims_router
 app.include_router(claims_router)
+
 
 @app.get("/health")
 def health_check():
