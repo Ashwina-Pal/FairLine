@@ -1,1 +1,21 @@
 .env
+.env.*
+*.env
+
+# Python Virtual Environments & Cache
+.venv/
+venv/
+__pycache__/
+.ruff_cache/
+
+# Local Testing Uploads fallback
+backend/static/uploads/*
+
+# Credentials Service Account JSONs
+*service-account*.json
+*credentials*.json
+firebase-key.json
+
+# Test Artifacts
+playwright-report/
+test-results/
