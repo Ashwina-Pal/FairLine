@@ -4,3 +4,4 @@ pydantic
 firebase-admin
 python-dotenv
 google-genai
+python-multipart
