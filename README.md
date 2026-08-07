@@ -24,3 +24,4 @@ The Policy Validation engine enforces the following core rules:
 *   [Project Brief](file:///c:/FairLine/docs/project-brief.md) - Project overview, target personas, and scope.
 *   [Product Requirements Document (PRD)](file:///c:/FairLine/docs/prd.md) - Features, user stories, and acceptance criteria.
 *   [Architecture & Data Model](file:///c:/FairLine/docs/architecture.md) - Technical specifications, Firestore schemas, and engine rules.
+*   [Agents & Skills Specification](file:///c:/FairLine/AGENTS_AND_SKILLS.md) - Detailed contracts, Pydantic schemas, policy rules, and constraints for the Custom Agent and Skill.
