@@ -35,6 +35,9 @@ jobs:
 
   frontend-checks:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,19 +50,19 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Dependencies
-        run: npm --prefix frontend ci
+        run: npm ci
 
       - name: Run ESLint Check
-        run: npm --prefix frontend run lint
+        run: npm run lint
 
       - name: Build Next.js App
-        run: npm --prefix frontend run build
+        run: npm run build
 
       - name: Install Playwright Browsers
-        run: npx --prefix frontend playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright e2e Tests
-        run: npx --prefix frontend playwright test
+        run: npx playwright test
         env:
           CI: true
 
