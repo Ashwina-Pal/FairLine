@@ -22,8 +22,8 @@ As an employee, I want my low-value, compliant expenses to be approved instantly
 
 **Story 2: The Escalation Path (Policy Violation / Discrepancy)**
 As the system, I want to flag claims that break the rules or lack clarity so a human can make the final judgment.
-*   **AC 1:** Given a user submits a $200 software subscription claim with a missing or blurry receipt, when the agent attempts extraction, it detects a missing data field or low confidence.
-*   **AC 2:** When the policy engine evaluates the data, it triggers the rule: "Missing receipt for claims > $50."
+*   **AC 1:** Given a user submits a $75 meal claim with a missing receipt image, when the policy engine evaluates the claim, it detects the missing receipt.
+*   **AC 2:** When the policy engine evaluates the data, it triggers the rule: "Missing receipt for category 'Meals' and amount > $50."
 *   **AC 3:** Then the claim status changes to "Pending Review" (Escalated) and is routed to the Approver Dashboard.
 
 **Story 3: Human-in-the-Loop Resolution**
