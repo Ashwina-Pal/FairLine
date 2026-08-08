@@ -19,3 +19,9 @@ firebase-key.json
 # Test Artifacts
 playwright-report/
 test-results/
+
+# Pytest cache
+.pytest_cache/
+
+# Local generated test receipt images
+sample_receipt.png
