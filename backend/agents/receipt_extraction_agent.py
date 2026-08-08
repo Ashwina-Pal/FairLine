@@ -2,7 +2,7 @@
 # CUSTOM AGENT: Receipt Extraction Agent
 # ==========================================
 # This is the designated "Custom Agent" for the FairLine expense system.
-# It uses Gemini 1.5 Flash to extract structured key-value pairs (merchant,
+# It uses Gemini 3.5 Flash to extract structured key-value pairs (merchant,
 # total_amount, date, confidence_score) from unstructured receipt images.
 # ==========================================
 
@@ -33,7 +33,7 @@ def get_gemini_client() -> genai.Client:
 def extract_receipt_data(image_bytes: bytes, mime_type: str = "image/jpeg") -> ExtractedData:
     """
     Extracts structured receipt information from receipt image bytes.
-    Uses Gemini 1.5 Flash Vision capabilities and forces structured output
+    Uses Gemini 3.5 Flash Vision capabilities and forces structured output
     matching the ExtractedData schema.
     """
     client = get_gemini_client()
@@ -48,9 +48,9 @@ def extract_receipt_data(image_bytes: bytes, mime_type: str = "image/jpeg") -> E
     )
 
     try:
-        # Generate content using Gemini 1.5 Flash with structured schema configuration
+        # Generate content using Gemini 3.5 Flash with structured schema configuration
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-3.5-flash",
             contents=[types.Part.from_bytes(data=image_bytes, mime_type=mime_type), prompt],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
