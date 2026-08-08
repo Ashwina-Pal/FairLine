@@ -65,7 +65,7 @@ export default function RootLayout({
 
         {/* Footer */}
         <footer className="border-t border-slate-900 bg-slate-950/50 py-6 text-center text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} FairLine. Powered by Google Gemini 1.5 Flash. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} FairLine. Powered by Google Gemini 3.5 Flash. All rights reserved.</p>
         </footer>
       </body>
     </html>

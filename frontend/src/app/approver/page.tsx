@@ -250,148 +250,186 @@ export default function ApproverQueuePage() {
           ) : (
             <div className="flex flex-col flex-grow min-h-0 overflow-y-auto">
               
-              {/* Upper Section: Split Screen Receipt Image vs Flagged rules */}
-              <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-850 bg-slate-950/20 min-h-0">
-                
-                {/* Receipt Image Side */}
-                <div className="p-6 border-b md:border-b-0 md:border-r border-slate-850 flex flex-col items-center justify-center bg-slate-950/30">
-                  <span className="text-xs font-semibold text-slate-450 uppercase self-start mb-3 tracking-wider">
-                    Receipt Attachment Image
-                  </span>
-                  
-                  {selectedClaim.receipt_image_url ? (
-                    <div className="relative group max-w-full rounded-xl overflow-hidden border border-slate-800 max-h-56 shadow-lg">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={selectedClaim.receipt_image_url.startsWith("/static") 
-                          ? `${API_BASE_URL}${selectedClaim.receipt_image_url}` 
-                          : selectedClaim.receipt_image_url}
-                        alt="Expense Receipt"
-                        className="object-contain max-h-52 w-auto"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full py-16 border border-dashed border-rose-500/10 bg-rose-500/5 rounded-xl flex flex-col items-center justify-center text-center p-4">
-                      <svg className="w-10 h-10 text-rose-400/70 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                      <span className="font-semibold text-sm text-rose-400">No Receipt Document Uploaded</span>
-                      <span className="text-[11px] text-slate-500 max-w-xs mt-1">This claim was submitted without an attached receipt file.</span>
-                    </div>
-                  )}
+              {/* Claim Header Info */}
+              <div className="p-6 border-b border-slate-850 bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono text-slate-555">ID: {selectedClaim.claim_id}</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+                      selectedClaim.status === "AUTO_APPROVED" || selectedClaim.status === "MANUAL_APPROVED"
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : selectedClaim.status === "ESCALATED"
+                        ? "bg-amber-500/10 text-amber-405 border-amber-500/20"
+                        : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                    }`}>
+                      {selectedClaim.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-205 mt-1">
+                    ${selectedClaim.manual_inputs.amount.toFixed(2)} — {selectedClaim.manual_inputs.category}
+                  </h3>
                 </div>
+                <div className="text-left sm:text-right text-xs text-slate-400 flex flex-col gap-1">
+                  <span>Cost Center: <strong className="text-slate-200 font-bold">{selectedClaim.manual_inputs.cost_center}</strong></span>
+                  <span>Date: <span className="font-mono text-slate-350">{selectedClaim.manual_inputs.date}</span></span>
+                </div>
+              </div>
 
-                {/* Evidence Packet Side */}
-                <div className="p-6 space-y-4">
-                  <span className="text-xs font-semibold text-slate-450 uppercase tracking-wider block">
-                    Evidence Verification Packet
-                  </span>
+              {/* Main Content Area */}
+              <div className="p-6 space-y-6 flex-grow">
+                
+                {/* Top Section Grid (Receipt vs Evidence) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   
-                  {selectedClaim.evidence_packet && (
-                    <div className="space-y-3">
-                      <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4">
-                        <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wide mb-1.5">
-                          Violations Detected:
+                  {/* Receipt View Card */}
+                  <div className="bg-slate-955/40 border border-slate-800/80 rounded-xl p-5 flex flex-col justify-start">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-4">
+                      Receipt Attachment Image
+                    </span>
+                    
+                    {selectedClaim.receipt_image_url ? (
+                      <div className="flex items-center justify-center flex-grow p-4 bg-slate-950/40 border border-slate-850 rounded-xl min-h-48">
+                        <div className="relative group max-w-full rounded-lg overflow-hidden border border-slate-800 shadow-lg transition-transform duration-300 hover:scale-[1.02] hover:border-slate-700">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={selectedClaim.receipt_image_url.startsWith("/static") 
+                              ? `${API_BASE_URL}${selectedClaim.receipt_image_url}` 
+                              : selectedClaim.receipt_image_url}
+                            alt="Expense Receipt"
+                            className="object-contain max-h-52 w-auto"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-grow py-12 border border-dashed border-rose-500/10 bg-rose-500/5 rounded-xl flex flex-col items-center justify-center text-center p-4">
+                        <svg className="w-10 h-10 text-rose-400/70 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span className="font-semibold text-sm text-rose-455">No Receipt Document Uploaded</span>
+                        <span className="text-[11px] text-slate-555 max-w-xs mt-1">This claim was submitted without an attached receipt file.</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Evidence & Compliance Info Card */}
+                  <div className="bg-slate-955/40 border border-slate-800/80 rounded-xl p-5 flex flex-col justify-start space-y-4">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+                      Evidence Verification Packet
+                    </span>
+                    
+                    {selectedClaim.evidence_packet && (
+                      <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4">
+                        <h4 className="text-[10px] font-bold text-amber-405 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          Violations Detected
                         </h4>
                         <div className="flex flex-wrap gap-1.5 mb-2.5">
                           {selectedClaim.evidence_packet.flagged_rule_ids.map((id) => (
-                            <span key={id} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/20">
+                            <span key={id} className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/10">
                               {id}
                             </span>
                           ))}
                         </div>
-                        <p className="text-sm text-slate-200 leading-relaxed font-medium">
+                        <p className="text-xs text-slate-200 leading-relaxed font-medium">
                           {selectedClaim.evidence_packet.explanation}
                         </p>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Summary Comparison */}
-                  <div className="text-xs space-y-2 bg-slate-950/40 p-3.5 rounded-xl border border-slate-850">
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Claimed Amount:</span>
-                      <span className="font-mono font-bold text-slate-300">${selectedClaim.manual_inputs.amount.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Extracted Amount:</span>
-                      <span className="font-mono text-slate-400">
-                        {selectedClaim.extracted_data?.total_amount 
-                          ? `$${selectedClaim.extracted_data.total_amount.toFixed(2)}` 
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-500">Cost Center / Category:</span>
-                      <span className="text-slate-400">{selectedClaim.manual_inputs.cost_center} / {selectedClaim.manual_inputs.category}</span>
-                    </div>
-                    {selectedClaim.extracted_data?.confidence_score !== undefined && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500">Agent Confidence:</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                          selectedClaim.extracted_data.confidence_score >= 0.85 
-                            ? "bg-emerald-500/10 text-emerald-400" 
-                            : "bg-rose-500/10 text-rose-400"
+                    {/* Summary Parameters Comparison */}
+                    <div className="text-xs space-y-3 bg-slate-950/50 p-4 rounded-xl border border-slate-850">
+                      <div className="flex justify-between items-center py-1 border-b border-slate-900">
+                        <span className="text-slate-400">Claimed Amount:</span>
+                        <span className="font-mono font-bold text-slate-200">${selectedClaim.manual_inputs.amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-slate-900">
+                        <span className="text-slate-400">Extracted Amount:</span>
+                        <span className={`font-mono font-bold ${
+                          selectedClaim.extracted_data?.total_amount !== selectedClaim.manual_inputs.amount 
+                            ? "text-amber-400" 
+                            : "text-slate-350"
                         }`}>
-                          {(selectedClaim.extracted_data.confidence_score * 100).toFixed(0)}%
+                          {selectedClaim.extracted_data?.total_amount 
+                            ? `$${selectedClaim.extracted_data.total_amount.toFixed(2)}` 
+                            : "N/A (Extraction Failed)"}
                         </span>
                       </div>
+                      <div className="flex justify-between items-center py-1 border-b border-slate-900">
+                        <span className="text-slate-400">Cost Center & Category:</span>
+                        <span className="text-slate-350">{selectedClaim.manual_inputs.cost_center} / {selectedClaim.manual_inputs.category}</span>
+                      </div>
+                      {selectedClaim.extracted_data?.confidence_score !== undefined && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-slate-400">Agent Confidence:</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold font-mono border ${
+                            selectedClaim.extracted_data.confidence_score >= 0.85 
+                              ? "bg-emerald-500/10 text-emerald-450 border-emerald-500/20" 
+                              : "bg-rose-500/10 text-rose-450 border-rose-500/20"
+                          }`}>
+                            {(selectedClaim.extracted_data.confidence_score * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Bottom Row Audit Trail Card */}
+                <div className="bg-slate-955/40 border border-slate-800/80 rounded-xl p-5 flex flex-col">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-4">
+                    Immutable State Audit Trail
+                  </span>
+                  
+                  <div className="space-y-4 overflow-y-auto max-h-60 pr-2">
+                    {selectedClaim.audit_logs && selectedClaim.audit_logs.length > 0 ? (
+                      <div className="relative border-l border-slate-850 ml-3 space-y-5">
+                        {selectedClaim.audit_logs.map((log, index) => (
+                          <div key={log.log_id} className="relative pl-6">
+                            {/* Dot marker */}
+                            <div className={`absolute -left-1.5 top-1.5 w-3 h-3 rounded-full border border-slate-950 ${
+                              index === selectedClaim.audit_logs!.length - 1 ? "bg-indigo-500 animate-pulse" : "bg-slate-700"
+                            }`} />
+                            
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded border uppercase ${getActorColor(log.actor)}`}>
+                                  {getActorLabel(log.actor)}
+                                </span>
+                                <span className="text-xs font-bold text-slate-205">
+                                  {log.action.toUpperCase()}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-slate-500 font-mono">
+                                {new Date(log.timestamp).toLocaleString()}
+                              </span>
+                            </div>
+                            
+                            {log.details && (
+                              <p className="text-xs text-slate-400 bg-slate-950/30 px-3 py-1.5 rounded-lg border border-slate-900/60 mt-1 font-mono break-all max-w-full">
+                                {log.details.length > 250 ? `${log.details.substring(0, 250)}...` : log.details}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-550 italic">No audit trail records found.</p>
                     )}
                   </div>
                 </div>
+
               </div>
 
-              {/* Lower Section: Chronological Audit Trail */}
-              <div className="p-6 flex-grow min-h-0 flex flex-col">
-                <span className="text-xs font-semibold text-slate-450 uppercase tracking-wider block mb-4">
-                  Immutable State Audit Trail
-                </span>
-                
-                <div className="space-y-4 overflow-y-auto max-h-56 pr-2">
-                  {selectedClaim.audit_logs && selectedClaim.audit_logs.length > 0 ? (
-                    <div className="relative border-l border-slate-800 ml-3 space-y-5">
-                      {selectedClaim.audit_logs.map((log, index) => (
-                        <div key={log.log_id} className="relative pl-6">
-                          {/* Dot marker */}
-                          <div className={`absolute -left-1.5 top-1.5 w-3 h-3 rounded-full border border-slate-950 ${
-                            index === selectedClaim.audit_logs!.length - 1 ? "bg-indigo-500 animate-ping-once" : "bg-slate-700"
-                          }`} />
-                          
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${getActorColor(log.actor)}`}>
-                                {getActorLabel(log.actor)}
-                              </span>
-                              <span className="text-sm font-semibold text-slate-200">
-                                {log.action.charAt(0).toUpperCase() + log.action.slice(1)}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-slate-500 font-mono">
-                              {new Date(log.timestamp).toLocaleString()}
-                            </span>
-                          </div>
-                          
-                          {log.details && (
-                            <p className="text-xs text-slate-400 bg-slate-950/20 px-3 py-1.5 rounded-lg border border-slate-900 mt-1">
-                              {log.details.length > 150 ? `${log.details.substring(0, 150)}...` : log.details}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-500 italic">No audit trail records found.</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons bar */}
-              <div className="p-4 border-t border-slate-850 bg-slate-950/40 flex justify-end gap-3">
+              {/* Action Buttons Footer bar */}
+              <div className="p-4 border-t border-slate-855 bg-slate-950/40 flex justify-end gap-3 shrink-0">
                 <button
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleDecision(selectedClaim.claim_id, "REJECT")}
-                  className="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/30 text-rose-400 font-semibold py-2 px-5 rounded-xl text-sm transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50"
+                  className="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/35 text-rose-455 font-semibold py-2.5 px-5 rounded-xl text-sm transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50"
                 >
                   {actionLoading ? "Processing..." : "Reject Claim"}
                 </button>
@@ -399,7 +437,7 @@ export default function ApproverQueuePage() {
                   type="button"
                   disabled={actionLoading}
                   onClick={() => handleDecision(selectedClaim.claim_id, "APPROVE")}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-5 rounded-xl text-sm transition-all duration-200 cursor-pointer shadow-lg shadow-emerald-500/15 active:scale-95 disabled:opacity-50"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-5 rounded-xl text-sm transition-all duration-200 cursor-pointer shadow-lg shadow-emerald-500/15 active:scale-95 disabled:opacity-50"
                 >
                   {actionLoading ? "Processing..." : "Approve Claim"}
                 </button>
